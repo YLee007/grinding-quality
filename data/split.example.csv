@@ -1,0 +1,4 @@
+image,mask,split,group
+data/images/your_plate_A_01.jpg,data/annotations/your_plate_A_01.png,train,plate_A
+data/images/your_plate_A_02.jpg,data/annotations/your_plate_A_02.png,train,plate_A
+data/images/your_plate_B_01.jpg,data/annotations/your_plate_B_01.png,val,plate_B

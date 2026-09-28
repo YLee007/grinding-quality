@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+weights/
+data/
+outputs/
+third_party/
+*.log
+
+# Keep reproducibility metadata and examples while excluding large/private assets.
+!weights/
+weights/*
+!weights/MODEL_CARD.md
+!data/
+data/*
+!data/split.example.csv

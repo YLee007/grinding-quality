@@ -1,0 +1,63 @@
+# All relative paths are relative to the grinding_quality directory.
+method: baseline  # baseline | rf | unet | onnx
+input: data/images
+output: outputs/baseline
+max_side: 1280
+show_window: false
+camera:
+  id: 0
+  width: 1280
+  height: 720
+  analyze_every_n_frames: 5
+  save_every_n_results: 10
+  max_results: 0   # 0 means until Q / Esc / Ctrl+C
+# Exploratory plate-interior ROIs, NOT a confirmed production grinding footprint.
+# Coordinates normalized [x_min, y_min, x_max, y_max], before resizing.
+roi:
+  default: [0.0, 0.0, 1.0, 1.0]
+  overrides:
+    sample01.jpg: [0.09, 0.02, 0.95, 0.95]
+    sample02.jpg: [0.02, 0.16, 0.97, 0.90]
+    sample03.jpg: [0.05, 0.05, 0.98, 0.90]
+    sample04.jpg: [0.07, 0.10, 0.98, 0.81]
+  exclude_rects:
+    sample04.jpg: [[0.735, 0.428, 0.80, 0.46]]  # visible foreign object
+baseline:
+  metal_l_min: 135.0       # OpenCV Lab L: 0..255, calibrated only after lighting is fixed
+  metal_chroma_max: 17.0
+  dark_l_max: 95.0
+  rust_h_min: 3.0         # OpenCV HSV hue: 0..179
+  rust_h_max: 38.0
+  rust_s_min: 42.0
+  texture_weight: 0.10
+  min_evidence: 0.62
+  min_margin: 0.12
+image_gate:
+  overexposed_min: 250
+  underexposed_max: 12
+# These are DEMONSTRATION thresholds, not industrial acceptance standards.
+assessment:
+  grid_px: 80
+  max_residual_fraction: 0.05
+  min_evaluable_fraction: 0.85
+  min_component_area_px: 30
+  mm_per_pixel_original: null  # only fill after planar geometric calibration
+rf:
+  checkpoint: weights/quality_rf.joblib
+  min_confidence: 0.75
+unet:
+  encoder: mobilenet_v2
+  encoder_weights: weights/mobilenet_v2-b0353104.pth
+  checkpoint: weights/quality_unet.pt
+  onnx_path: weights/quality_unet.onnx
+  input_size: 512
+  min_confidence: 0.75
+  device: auto
+training:
+  annotations: data/annotations
+  manifest: data/split.csv
+  epochs: 30
+  batch_size: 2
+  learning_rate: 0.0003
+  seed: 42
+  samples_per_class_per_image: 12000
