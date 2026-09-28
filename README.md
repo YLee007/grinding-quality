@@ -2,6 +2,14 @@
 
 已提供可直接运行的离线分析、USB 相机预览、涂画标注、随机森林训练、MobileNetV2 U-Net 训练、PyTorch/ONNX 推理和 ONNX 导出。首轮已分析用户提供的四张照片。当前有效输出是**颜色与纹理规则的候选结果**；尚未用人工标注训练现场质量模型，不能当作验收结论。
 
+Jetson 上只运行规则法时，可安装最小依赖，完全不需要 PyTorch、ONNX 或训练框架：
+
+```bash
+python3 -m venv .venv-baseline
+.venv-baseline/bin/pip install -r requirements-baseline.txt
+.venv-baseline/bin/python quality.py analyze --config config/quality.yaml
+```
+
 ## 原理与技术路线
 
 本项目把打磨质量评估建模为像素级三分类：`裸露金属`、`残锈/氧化层`和`不确定`。相机先在限定 ROI 内观察钢板，算法再生成分割掩膜、残留面积率、网格热力图和待返工区域坐标。这里的“金属光泽”不是只看亮度：规则基线联合 Lab/HSV 颜色、局部对比度、纹理与有效曝光判断，避免把阴影简单当成锈蚀、把高光简单当成合格。

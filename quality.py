@@ -8,8 +8,26 @@ from pathlib import Path
 import cv2
 import numpy as np
 from quality_core import (load_config, resolve, image_paths, read_image, write_image,
-                          resize_image, roi_mask, reject_unobservable, measure, visualize)
-from quality_models import Predictor
+                          resize_image, roi_mask, reject_unobservable, measure, visualize,
+                          baseline)
+
+
+class BaselinePredictor:
+    """Rule-only predictor that keeps the Jetson baseline free of ML dependencies."""
+
+    def __init__(self, cfg):
+        self.cfg = cfg
+
+    def predict(self, image):
+        return baseline(image, self.cfg)
+
+
+def make_predictor(cfg):
+    if cfg['method'] == 'baseline':
+        return BaselinePredictor(cfg)
+    # Import model dependencies only when an ML backend is explicitly selected.
+    from quality_models import Predictor
+    return Predictor(cfg)
 
 
 def analyze_one(original, name, cfg, predictor):
@@ -90,7 +108,7 @@ def analyze(cfg):
         raise ValueError('No input images found')
     if len({p.stem.lower() for p in paths}) != len(paths):
         raise ValueError('Input images must have unique stems to avoid overwriting report files')
-    predictor = Predictor(cfg)
+    predictor = make_predictor(cfg)
     out = resolve(cfg['output'])
     out.mkdir(parents=True, exist_ok=True)
     results = []
@@ -113,7 +131,7 @@ def camera(cfg):
         raise RuntimeError('Camera could not be opened')
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, c['width'])
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, c['height'])
-    predictor = Predictor(cfg)
+    predictor = make_predictor(cfg)
     out = resolve(cfg['output']) / time.strftime('camera_%Y%m%d_%H%M%S')
     out.mkdir(parents=True, exist_ok=True)
     print('Camera preview: configure fixed exposure/lighting using your camera controls. Ctrl+C to stop.')

@@ -1,0 +1,4 @@
+# Minimal runtime for rule-based analysis on Jetson or a desktop CPU.
+numpy>=1.26,<3
+opencv-python-headless>=4.8,<5
+PyYAML>=6,<7
