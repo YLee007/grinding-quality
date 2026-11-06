@@ -13,3 +13,7 @@ weights/*
 !data/
 data/*
 !data/split.example.csv
+
+# Native build and migration tests
+/build/
+/cpp_migration_stage/
